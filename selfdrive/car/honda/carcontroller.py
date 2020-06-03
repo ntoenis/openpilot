@@ -10,6 +10,11 @@ from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+BOSCH_ACCEL_LOOKUP_BP = [-1., 0., 0.6]
+BOSCH_ACCEL_LOOKUP_V = [-3.5, 0., 2.]
+BOSCH_GAS_LOOKUP_BP = [0., 0.6]
+BOSCH_GAS_LOOKUP_V = [0, 2000]
+
 def actuator_hystereses(brake, braking, brake_steady, v_ego, car_fingerprint):
   # hyst params
   brake_hyst_on = 0.02     # to activate brakes exceed this value
@@ -134,6 +139,22 @@ class CarController():
 
     # **** process the car messages ****
 
+    if CS.CP.carFingerprint in HONDA_BOSCH:
+      stopping = 0
+      starting = 0
+      accel = actuators.gas - actuators.brake
+      if accel < 0 and CS.out.vEgo < 0.3:
+        # prevent rolling backwards
+        stopping = 1
+        accel = -1.0
+      elif accel > 0 and CS.out.vEgo < 0.3:
+        starting = 1
+      apply_accel = interp(accel, BOSCH_ACCEL_LOOKUP_BP, BOSCH_ACCEL_LOOKUP_V)
+      apply_gas = interp(accel, BOSCH_GAS_LOOKUP_BP, BOSCH_GAS_LOOKUP_V)
+    else:
+      apply_gas = clip(actuators.gas, 0., 1.)
+      apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
+
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = int(interp(-actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
 
@@ -142,15 +163,29 @@ class CarController():
     # Send CAN commands.
     can_sends = []
 
+    if CS.CP.carFingerprint in HONDA_BOSCH and CS.CP.openpilotLongitudinalControl:
+      # TODO: radar disable hacked together to see if it works
+      if (frame % 10) == 0:
+        # tester present - w/ no response (keeps radar disabled)
+        can_sends.append([0x18DAB0F1, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 1 if CS.CP.isPandaBlack else 0])
+
     # Send steering command.
     idx = frame % 4
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
+<<<<<<< HEAD
       lkas_active, CS.CP.carFingerprint, idx, CS.CP.openpilotLongitudinalControl))
+=======
+      lkas_active, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl))
+>>>>>>> 326e6ec7... honda bosch longitudinal
 
     # Send dashboard UI commands.
     if (frame % 10) == 0:
       idx = (frame//10) % 4
+<<<<<<< HEAD
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
+=======
+      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
+>>>>>>> 326e6ec7... honda bosch longitudinal
 
     if not CS.CP.openpilotLongitudinalControl:
       if (frame % 2) == 0:
@@ -168,6 +203,7 @@ class CarController():
         idx = frame // 2
         ts = frame * DT_CTRL
         if CS.CP.carFingerprint in HONDA_BOSCH:
+<<<<<<< HEAD
           pass # TODO: implement
         else:
           apply_gas = clip(actuators.gas, 0., 1.)
@@ -175,6 +211,13 @@ class CarController():
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
           can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
             pcm_override, pcm_cancel_cmd, hud.fcw, idx, CS.CP.carFingerprint, CS.stock_brake))
+=======
+          can_sends.extend(hondacan.create_acc_commands(self.packer, enabled, apply_accel, apply_gas, idx, stopping, starting, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+        else:
+          pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
+          can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
+            pcm_override, pcm_cancel_cmd, hud.fcw, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack, CS.stock_brake))
+>>>>>>> 326e6ec7... honda bosch longitudinal
           self.apply_brake_last = apply_brake
 
           if CS.CP.enableGasInterceptor:
