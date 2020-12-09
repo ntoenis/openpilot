@@ -4,11 +4,17 @@ from common.realtime import DT_CTRL
 from selfdrive.controls.lib.drive_helpers import rate_limit
 from common.numpy_fast import clip, interp
 from selfdrive.car import create_gas_command
-from selfdrive.car.honda import hondacan
+from selfdrive.car.honda import hondacan, teslaradarcan
 from selfdrive.car.honda.values import CruiseButtons, CAR, VISUAL_HUD, HONDA_BOSCH
 from opendbc.can.packer import CANPacker
+from common.params_pxd cimport Params as c_Params
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
+
+BOSCH_ACCEL_LOOKUP_BP = [-1., 0., 0.6]
+BOSCH_ACCEL_LOOKUP_V = [-3.5, 0., 2.]
+BOSCH_GAS_LOOKUP_BP = [0., 0.6]
+BOSCH_GAS_LOOKUP_V = [0, 2000]
 
 def actuator_hystereses(brake, braking, brake_steady, v_ego, car_fingerprint):
   # hyst params
@@ -93,6 +99,22 @@ class CarController():
     self.last_pump_ts = 0.
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
+    
+    # begin tesla radar
+    p = Params()
+    self.radarVin_idx = 0
+    # set the radar vin if you want to use the tesla radar
+    self.useTeslaRadar = 1 if p.get("TeslaRadarVin") != "00000000000000000" else 0
+    if self.useTeslaRadar:
+      # info on this is available at https://tinkla.us/index.php/Tesla_Bosch_Radar
+      self.RadarVin = p.get("TeslaRadarVin")
+      self.RadarOffset = p.get("TeslaRadarOffset")
+      self.RadarPosition = p.get("TeslaRadarPosition")
+      self.RadarEpasType = p.get("TeslaRadarEpasType")
+      # TODO: get this based on the car
+      self.radarBus = 2
+      self.RadarTriggerMessage = 0x17c
+    # end tesla radar
 
     self.params = CarControllerParams(CP)
 
@@ -133,6 +155,21 @@ class CarController():
                   hud_lanes, fcw_display, acc_alert, steer_required)
 
     # **** process the car messages ****
+    if CS.CP.carFingerprint in HONDA_BOSCH:
+      stopping = 0
+      starting = 0
+      accel = actuators.gas - actuators.brake
+      if accel < 0 and CS.out.vEgo < 0.3:
+        # prevent rolling backwards
+        stopping = 1
+        accel = -1.0
+      elif accel > 0 and CS.out.vEgo < 0.3:
+        starting = 1
+      apply_accel = interp(accel, BOSCH_ACCEL_LOOKUP_BP, BOSCH_ACCEL_LOOKUP_V)
+      apply_gas = interp(accel, BOSCH_GAS_LOOKUP_BP, BOSCH_GAS_LOOKUP_V)
+    else:
+      apply_gas = clip(actuators.gas, 0., 1.)
+      apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
 
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = int(interp(-actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
@@ -168,10 +205,8 @@ class CarController():
         idx = frame // 2
         ts = frame * DT_CTRL
         if CS.CP.carFingerprint in HONDA_BOSCH:
-          pass # TODO: implement
+          can_sends.extend(hondacan.create_acc_commands(self.packer, enabled, apply_accel, apply_gas, idx, stopping, starting, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         else:
-          apply_gas = clip(actuators.gas, 0., 1.)
-          apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
           can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
             pcm_override, pcm_cancel_cmd, hud.fcw, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack, CS.stock_brake))
@@ -181,5 +216,11 @@ class CarController():
             # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
             # This prevents unexpected pedal range rescaling
             can_sends.append(create_gas_command(self.packer, apply_gas, idx))
-
+            
+    if self.useTeslaRadar:
+      if (frame % 100 == 0):
+        can_sends.append(teslaradarcan.create_radar_VIN_msg(self.radarVin_idx, self.radarVIN, self.radarBus, self.RadarTriggerMessage, self.useTeslaRadar, self.RadarPosition, self.RadarEpasType))
+        self.radarVin_idx += 1
+        self.radarVin_idx = self.radarVin_idx % 3
+        
     return can_sends
