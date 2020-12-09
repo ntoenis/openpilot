@@ -2,8 +2,8 @@
 from cereal import car
 import time
 from opendbc.can.parser import CANParser
-from cereal.services import service_list
-import cereal.messaging as messaging
+#from cereal.services import service_list
+#import cereal.messaging as messaging
 from selfdrive.car.interfaces import RadarInterfaceBase
 from selfdrive.car.honda.values import DBC
 
@@ -62,6 +62,7 @@ def _create_radard_can_parser():
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
+    super().__init__(CP)
     params = Params()
     # radar
     self.pts = {}
@@ -89,7 +90,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.delay = int(round(0.1 / CP.radarTimeStep))   # 0.1s delay of radar
 
-  def update(self, can_strings, v_ego):
+  def update(self, can_strings):
     # in Bosch radar and we are only steering for now, so sleep 0.05s to keep
     # radard at 20Hz and return no points
     if self.radar_off_can:
@@ -102,17 +103,21 @@ class RadarInterface(RadarInterfaceBase):
       vls = self.rcp.update_strings(can_strings)
       self.updated_messages.update(vls)
 
-        if self.trigger_start_msg not in self.updated_messages:
-      return None, None, self.AHB_car_detected
+    if self.trigger_start_msg not in self.updated_messages:
+      return None
+    
+    if self.trigger_end_msg not in self.updated_messages:
+      return None
 
-    rr, rrext, self.AHB_car_detected = self._update(self.updated_messages, v_ego)
+    rr = self._update(self.updated_messages)
     self.updated_messages.clear()
+    
     # return rr, rrext, self.AHB_car_detected
     return rr
 
-  def _update(self, updated_messages, v_ego):
+  def _update(self, updated_messages):
     ret = car.RadarData.new_message()
-    AHB_car_detected = False
+    #AHB_car_detected = False
     for message in updated_messages:
       if not(message in RADAR_A_MSGS):
         if message in self.pts:
@@ -140,14 +145,14 @@ class RadarInterface(RadarInterfaceBase):
           # del self.extPts[message]
 
       # this is the logic used for Auto High Beam (AHB) car detection
-      if (cpt['Valid'] or cpt['Tracked']) and (abs(cpt['LongSpeed']) < 80) and (cpt['LongDist']>0) and (cpt['LongDist'] < AHB_MAX_DISTANCE) and (cpt['LongDist'] < BOSCH_MAX_DIST) and \
-         (self.valid_cnt[message] > AHB_VALID_MESSAGE_COUNT_THRESHOLD) and (cpt['ProbExist'] >= AHB_OBJECT_MIN_PROBABILITY) and \
-         (cpt2['Class'] < 4) and (cpt2['ProbClass'] >= AHB_CLASS_MIN_PROBABILITY):
-         # if moving or the relative speed is x% larger than our speed then use to turn high beam off
-         if ((cpt['LongSpeed'] <= - AHB_STATIONARY_MARGIN - v_ego) or (cpt['LongSpeed'] >= AHB_STATIONARY_MARGIN - v_ego)):
-          AHB_car_detected = True
-          if AHB_DEBUG:
-              print(cpt, cpt2)
+      # if (cpt['Valid'] or cpt['Tracked']) and (abs(cpt['LongSpeed']) < 80) and (cpt['LongDist']>0) and (cpt['LongDist'] < AHB_MAX_DISTANCE) and (cpt['LongDist'] < BOSCH_MAX_DIST) and \
+      #    (self.valid_cnt[message] > AHB_VALID_MESSAGE_COUNT_THRESHOLD) and (cpt['ProbExist'] >= AHB_OBJECT_MIN_PROBABILITY) and \
+      #    (cpt2['Class'] < 4) and (cpt2['ProbClass'] >= AHB_CLASS_MIN_PROBABILITY):
+      #    # if moving or the relative speed is x% larger than our speed then use to turn high beam off
+      #    if ((cpt['LongSpeed'] <= - AHB_STATIONARY_MARGIN - v_ego) or (cpt['LongSpeed'] >= AHB_STATIONARY_MARGIN - v_ego)):
+      #     AHB_car_detected = True
+      #     if AHB_DEBUG:
+      #         print(cpt, cpt2)
       # radar point only valid if it's a valid measurement and score is above 50
       # bosch radar data needs to match Index and Index2 for validity
       # also for now ignore construction elements
