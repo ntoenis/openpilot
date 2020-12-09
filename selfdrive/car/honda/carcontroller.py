@@ -107,13 +107,13 @@ class CarController():
     self.useTeslaRadar = 1 if p.get("TeslaRadarVin") != "00000000000000000" else 0
     if self.useTeslaRadar:
       # info on this is available at https://tinkla.us/index.php/Tesla_Bosch_Radar
-      self.RadarVin = p.get("TeslaRadarVin")
-      self.RadarOffset = p.get("TeslaRadarOffset")
-      self.RadarPosition = p.get("TeslaRadarPosition")
-      self.RadarEpasType = p.get("TeslaRadarEpasType")
+      self.radarVin = p.get("TeslaRadarVin")
+      self.radarOffset = p.get("TeslaRadarOffset")
+      self.radarPosition = p.get("TeslaRadarPosition")
+      self.radarEpasType = p.get("TeslaRadarEpasType")
       # TODO: get this based on the car
       self.radarBus = 2
-      self.RadarTriggerMessage = 0x17c
+      self.radarTriggerMessage = 0x94
     # end tesla radar
 
     self.params = CarControllerParams(CP)
