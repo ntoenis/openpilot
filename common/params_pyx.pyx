@@ -70,6 +70,11 @@ keys = {
   b"Offroad_NeosUpdate": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_UpdateFailed": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_HardwareUnsupported": [TxType.CLEAR_ON_MANAGER_START],
+    # TODO: get the vin and config automagically on the first start. reset on manager start. see manager.py
+  b"TeslaRadarVin": [TxType.PERSISTENT],
+  b"TeslaRadarOffset": [TxType.PERSISTENT],
+  b"TeslaRadarPosition": [TxType.PERSISTENT],
+  b"TeslaRadarEpasType": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):
