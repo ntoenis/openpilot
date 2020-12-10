@@ -6,6 +6,8 @@
 //      accel rising edge
 //      brake rising edge
 //      brake > 0mph
+#include "safety_teslaradar.h"
+
 const CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5}, {0x194, 0, 4}, {0x1FA, 0, 8}, {0x200, 0, 6}, {0x30C, 0, 8}, {0x33D, 0, 5}};
 const CanMsg HONDA_BG_TX_MSGS[] = {{0xE4, 2, 5}, {0xE5, 2, 8}, {0x296, 0, 4}, {0x33D, 2, 5}};  // Bosch Giraffe
 const CanMsg HONDA_BH_TX_MSGS[] = {{0xE4, 0, 5}, {0xE5, 0, 8}, {0x296, 1, 4}, {0x33D, 0, 5}};  // Bosch Harness
@@ -94,6 +96,16 @@ static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     int len = GET_LEN(to_push);
     int bus = GET_BUS(to_push);
 
+   
+    //do the tesla radar call
+    teslaradar_rx_hook(to_push);
+
+    //speed for radar
+    if ((to_push->RIR>>21) == 0x309) {
+    // first 2 bytes
+    actual_speed_kph = (int)((((to_push->RDLR & 0xFF) << 8) + ((to_push->RDLR >>8) & 0xFF))*0.01);
+    }
+    
     // sample speed
     if (addr == 0x158) {
       // first 2 bytes
@@ -182,7 +194,50 @@ static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 //     block all commands that produce actuation
 
 static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
-
+  
+  //check if this is a teslaradar vin message
+  //capture message for radarVIN and settings
+  if ((to_send->RIR >> 21) == 0x560) {
+    int id = (to_send->RDLR & 0xFF);
+    int radarVin_b1 = ((to_send->RDLR >> 8) & 0xFF);
+    int radarVin_b2 = ((to_send->RDLR >> 16) & 0xFF);
+    int radarVin_b3 = ((to_send->RDLR >> 24) & 0xFF);
+    int radarVin_b4 = (to_send->RDHR & 0xFF);
+    int radarVin_b5 = ((to_send->RDHR >> 8) & 0xFF);
+    int radarVin_b6 = ((to_send->RDHR >> 16) & 0xFF);
+    int radarVin_b7 = ((to_send->RDHR >> 24) & 0xFF);
+    if (id == 0) {
+      tesla_radar_should_send = radarVin_b2;
+      tesla_radar_trigger_message_id = (radarVin_b3 << 8) + radarVin_b4;
+      tesla_radar_can = radarVin_b1;
+      radar_VIN[0] = radarVin_b5;
+      radar_VIN[1] = radarVin_b6;
+      radar_VIN[2] = radarVin_b7;
+      tesla_radar_vin_complete = tesla_radar_vin_complete | 1;
+    }
+    if (id == 1) {
+      radar_VIN[3] = radarVin_b1;
+      radar_VIN[4] = radarVin_b2;
+      radar_VIN[5] = radarVin_b3;
+      radar_VIN[6] = radarVin_b4;
+      radar_VIN[7] = radarVin_b5;
+      radar_VIN[8] = radarVin_b6;
+      radar_VIN[9] = radarVin_b7;
+      tesla_radar_vin_complete = tesla_radar_vin_complete | 2;
+    }
+    if (id == 2) {
+      radar_VIN[10] = radarVin_b1;
+      radar_VIN[11] = radarVin_b2;
+      radar_VIN[12] = radarVin_b3;
+      radar_VIN[13] = radarVin_b4;
+      radar_VIN[14] = radarVin_b5;
+      radar_VIN[15] = radarVin_b6;
+      radar_VIN[16] = radarVin_b7;
+      tesla_radar_vin_complete = tesla_radar_vin_complete | 4;
+    }
+    return false;
+  }
+  
   int tx = 1;
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
