@@ -6,6 +6,8 @@ from opendbc.can.parser import CANParser
 #import cereal.messaging as messaging
 from selfdrive.car.interfaces import RadarInterfaceBase
 from selfdrive.car.honda.values import DBC
+from common.params import Params
+import os 
 
 BOSCH_MAX_DIST = 250.  # max distance for radar
 # use these for tracks (5 tracks)
