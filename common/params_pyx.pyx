@@ -45,6 +45,7 @@ keys = {
   b"LastUpdateTime": [TxType.PERSISTENT],
   b"LastUpdateException": [TxType.PERSISTENT],
   b"LiveParameters": [TxType.PERSISTENT],
+  b"LongitudinalControl": [TxType.PERSISTENT],
   b"OpenpilotEnabledToggle": [TxType.PERSISTENT],
   b"LaneChangeEnabled": [TxType.PERSISTENT],
   b"PandaFirmware": [TxType.CLEAR_ON_MANAGER_START, TxType.CLEAR_ON_PANDA_DISCONNECT],
