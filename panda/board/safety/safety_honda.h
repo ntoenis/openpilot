@@ -101,9 +101,9 @@ static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     teslaradar_rx_hook(to_push);
 
     //speed for radar
-    if ((to_push->RIR>>21) == 0x309) {
+    if (addr == 0x309) {
     // first 2 bytes
-    actual_speed_kph = (int)((((to_push->RDLR & 0xFF) << 8) + ((to_push->RDLR >>8) & 0xFF))*0.01);
+      actual_speed_kph = (((GET_BYTE(to_push, 0) << 8) + GET_BYTE(to_push, 1)) * 0.01);
     }
     
     // sample speed
