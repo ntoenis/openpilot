@@ -7,7 +7,6 @@ from selfdrive.car import create_gas_command
 from selfdrive.car.honda import hondacan, teslaradarcan
 from selfdrive.car.honda.values import CruiseButtons, CAR, VISUAL_HUD, HONDA_BOSCH
 from opendbc.can.packer import CANPacker
-from common.params_pxd cimport Params as c_Params
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
