@@ -1,3 +1,4 @@
+#include "safety_teslaradar.h"
 // board enforces
 //   in-state
 //      accel set/resume
@@ -6,8 +7,6 @@
 //      accel rising edge
 //      brake rising edge
 //      brake > 0mph
-#include "safety_teslaradar.h"
-
 const CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5}, {0x194, 0, 4}, {0x1FA, 0, 8}, {0x200, 0, 6}, {0x30C, 0, 8}, {0x33D, 0, 5}};
 const CanMsg HONDA_BG_TX_MSGS[] = {{0xE4, 2, 5}, {0xE5, 2, 8}, {0x296, 0, 4}, {0x33D, 2, 5}, {0x560, 2, 8}};  // Bosch Giraffe
 const CanMsg HONDA_BH_TX_MSGS[] = {{0xE4, 0, 5}, {0xE5, 0, 8}, {0x296, 1, 4}, {0x33D, 0, 5}, {0x560, 0, 8}};  // Bosch Harness
@@ -81,7 +80,10 @@ static uint8_t honda_get_counter(CAN_FIFOMailBox_TypeDef *to_push) {
 }
 
 static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
-
+  
+  //do the tesla radar call
+    teslaradar_rx_hook(to_push);
+  
   bool valid;
   if (honda_hw == HONDA_BH_HW) {
     valid = addr_safety_check(to_push, honda_bh_rx_checks, HONDA_BH_RX_CHECKS_LEN,
@@ -95,23 +97,19 @@ static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     int addr = GET_ADDR(to_push);
     int len = GET_LEN(to_push);
     int bus = GET_BUS(to_push);
-
-   
-    //do the tesla radar call
-    teslaradar_rx_hook(to_push);
-
-    //speed for radar
-    if (addr == 0x309) {
-    // first 2 bytes
-      actual_speed_kph = (((GET_BYTE(to_push, 0) << 8) + GET_BYTE(to_push, 1)) * 0.01);
-    }
     
     // sample speed
     if (addr == 0x158) {
       // first 2 bytes
       vehicle_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
     }
-
+    
+    //speed for radar
+    if (addr == 0x309) {
+    // first 2 bytes
+      actual_speed_kph = (((GET_BYTE(to_push, 0) << 8) + GET_BYTE(to_push, 1)) * 0.01);
+    }
+    
     // state machine to enter and exit controls
     // 0x1A6 for the ILX, 0x296 for the Civic Touring
     if ((addr == 0x1A6) || (addr == 0x296)) {
@@ -195,6 +193,10 @@ static int honda_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
 static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   
+  int tx = 1;
+  int addr = GET_ADDR(to_send);
+  int bus = GET_BUS(to_send);
+  
   //check if this is a teslaradar vin message
   //capture message for radarVIN and settings
   if ((to_send->RIR >> 21) == 0x560) {
@@ -235,12 +237,10 @@ static int honda_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       radar_VIN[16] = radarVin_b7;
       tesla_radar_vin_complete = tesla_radar_vin_complete | 4;
     }
-    return false;
+    else {
+      return 0;
+    }
   }
-  
-  int tx = 1;
-  int addr = GET_ADDR(to_send);
-  int bus = GET_BUS(to_send);
 
   if ((honda_hw == HONDA_BG_HW) && !honda_bosch_long) {
     tx = msg_allowed(to_send, HONDA_BG_TX_MSGS, sizeof(HONDA_BG_TX_MSGS)/sizeof(HONDA_BG_TX_MSGS[0]));
