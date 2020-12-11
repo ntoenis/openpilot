@@ -97,13 +97,9 @@ class RadarD():
 
     self.ready = False
 
-<<<<<<< HEAD
-  def update(self, sm, rr, enable_lead):
-    self.current_time = 1e-9*max(sm.logMonoTime.values())
-=======
+
   def update(self, frame, sm, rr, enable_lead):
     self.current_time = 1e-9*max([sm.logMonoTime[key] for key in sm.logMonoTime.keys()])
->>>>>>> 326e6ec7... honda bosch longitudinal
 
     if sm.updated['controlsState']:
       self.v_ego = sm['controlsState'].vEgo
@@ -162,18 +158,6 @@ class RadarD():
 
     # *** publish radarState ***
     dat = messaging.new_message('radarState')
-<<<<<<< HEAD
-    dat.valid = sm.all_alive_and_valid()
-    radarState = dat.radarState
-    radarState.mdMonoTime = sm.logMonoTime['model']
-    radarState.canMonoTimes = list(rr.canMonoTimes)
-    radarState.radarErrors = list(rr.errors)
-    radarState.controlsStateMonoTime = sm.logMonoTime['controlsState']
-
-    if enable_lead:
-      radarState.leadOne = get_lead(self.v_ego, self.ready, clusters, sm['model'].lead, low_speed_override=True)
-      radarState.leadTwo = get_lead(self.v_ego, self.ready, clusters, sm['model'].leadFuture, low_speed_override=False)
-=======
     dat.valid = sm.all_alive_and_valid(service_list=['controlsState', 'model'])
     dat.radarState.mdMonoTime = sm.logMonoTime['model']
     dat.radarState.canMonoTimes = list(rr.canMonoTimes)
@@ -183,7 +167,6 @@ class RadarD():
     if enable_lead:
       dat.radarState.leadOne = get_lead(self.v_ego, self.ready, clusters, sm['model'].lead, low_speed_override=True)
       dat.radarState.leadTwo = get_lead(self.v_ego, self.ready, clusters, sm['model'].leadFuture, low_speed_override=False)
->>>>>>> 326e6ec7... honda bosch longitudinal
     return dat
 
 
@@ -213,12 +196,7 @@ def radard_thread(sm=None, pm=None, can_sock=None):
   rk = Ratekeeper(1.0 / CP.radarTimeStep, print_delay_threshold=None)
   RD = RadarD(CP.radarTimeStep, RI.delay)
 
-<<<<<<< HEAD
-  # TODO: always log leads once we can hide them conditionally
-  enable_lead = CP.openpilotLongitudinalControl or not CP.radarOffCan
-=======
   enable_lead = CP.openpilotLongitudinalControl
->>>>>>> 326e6ec7... honda bosch longitudinal
 
   while 1:
     can_strings = messaging.drain_sock_raw(can_sock, wait_for_one=True)
@@ -229,11 +207,7 @@ def radard_thread(sm=None, pm=None, can_sock=None):
 
     sm.update(0)
 
-<<<<<<< HEAD
-    dat = RD.update(sm, rr, enable_lead)
-=======
     dat = RD.update(rk.frame, sm, rr, enable_lead)
->>>>>>> 326e6ec7... honda bosch longitudinal
     dat.radarState.cumLagMs = -rk.remaining*1000.
 
     pm.send('radarState', dat)
