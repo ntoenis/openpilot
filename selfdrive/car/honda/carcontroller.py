@@ -172,20 +172,12 @@ class CarController():
     # Send steering command.
     idx = frame % 4
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
-<<<<<<< HEAD
-      lkas_active, CS.CP.carFingerprint, idx, CS.CP.openpilotLongitudinalControl))
-=======
       lkas_active, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl))
->>>>>>> 326e6ec7... honda bosch longitudinal
 
     # Send dashboard UI commands.
     if (frame % 10) == 0:
       idx = (frame//10) % 4
-<<<<<<< HEAD
-      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
-=======
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
->>>>>>> 326e6ec7... honda bosch longitudinal
 
     if not CS.CP.openpilotLongitudinalControl:
       if (frame % 2) == 0:
@@ -203,21 +195,11 @@ class CarController():
         idx = frame // 2
         ts = frame * DT_CTRL
         if CS.CP.carFingerprint in HONDA_BOSCH:
-<<<<<<< HEAD
-          pass # TODO: implement
-        else:
-          apply_gas = clip(actuators.gas, 0., 1.)
-          apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
-          pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
-          can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
-            pcm_override, pcm_cancel_cmd, hud.fcw, idx, CS.CP.carFingerprint, CS.stock_brake))
-=======
           can_sends.extend(hondacan.create_acc_commands(self.packer, enabled, apply_accel, apply_gas, idx, stopping, starting, CS.CP.carFingerprint, CS.CP.isPandaBlack))
         else:
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
           can_sends.append(hondacan.create_brake_command(self.packer, apply_brake, pump_on,
             pcm_override, pcm_cancel_cmd, hud.fcw, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack, CS.stock_brake))
->>>>>>> 326e6ec7... honda bosch longitudinal
           self.apply_brake_last = apply_brake
 
           if CS.CP.enableGasInterceptor:
