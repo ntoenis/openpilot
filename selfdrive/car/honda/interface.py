@@ -17,10 +17,6 @@ A_ACC_MAX = max(_A_CRUISE_MAX_V_FOLLOWING)
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
-<<<<<<< HEAD
-
-def compute_gb_honda(accel, speed):
-=======
 ALT_BRAKE_FLAG = 1
 BOSCH_LONG_FLAG = 2
 
@@ -28,7 +24,6 @@ def compute_gb_honda_bosch(accel, speed):
   return float(accel) / 3.5
 
 def compute_gb_honda_nidec(accel, speed):
->>>>>>> 326e6ec7... honda bosch longitudinal
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
@@ -133,15 +128,10 @@ class CarInterface(CarInterfaceBase):
     return float(max(max_accel, a_target / A_ACC_MAX)) * min(speedLimiter, accelLimiter)
 
   @staticmethod
-<<<<<<< HEAD
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]):  # pylint: disable=dangerous-default-value
-    ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
-=======
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):  # pylint: disable=dangerous-default-value
     params = Params()
 
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
->>>>>>> 326e6ec7... honda bosch longitudinal
     ret.carName = "honda"
     ret.safetyParam = 0
 
@@ -221,11 +211,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH):
       stop_and_go = True
       if not candidate == CAR.ACCORDH:  # Hybrid uses same brake msg as hatch
-<<<<<<< HEAD
-        ret.safetyParam = 1  # Accord(ICE), CRV 5G, and RDX 3G use an alternate user brake msg
-=======
         ret.safetyParam |= ALT_BRAKE_FLAG  # Accord and CRV 5G use an alternate user brake msg
->>>>>>> 326e6ec7... honda bosch longitudinal
       ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.83
       ret.centerToFront = ret.wheelbase * 0.39
@@ -272,11 +258,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.CRV_5G:
       stop_and_go = True
-<<<<<<< HEAD
-      ret.safetyParam = 1  # Accord(ICE), CRV 5G, and RDX 3G use an alternate user brake msg
-=======
       ret.safetyParam |= ALT_BRAKE_FLAG  # Accord and CRV 5G use an alternate user brake msg
->>>>>>> 326e6ec7... honda bosch longitudinal
       ret.mass = 3410. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.66
       ret.centerToFront = ret.wheelbase * 0.41
@@ -298,11 +280,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.CRV_HYBRID:
       stop_and_go = True
-<<<<<<< HEAD
-      ret.safetyParam = 1  # Accord(ICE), CRV 5G, and RDX 3G use an alternate user brake msg
-=======
       ret.safetyParam |= ALT_BRAKE_FLAG  # Accord and CRV 5G use an alternate user brake msg
->>>>>>> 326e6ec7... honda bosch longitudinal
       ret.mass = 1667. + STD_CARGO_KG  # mean of 4 models in kg
       ret.wheelbase = 2.66
       ret.centerToFront = ret.wheelbase * 0.41
