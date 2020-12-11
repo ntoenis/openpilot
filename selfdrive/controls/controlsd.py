@@ -198,8 +198,6 @@ class Controls:
     elif self.sm['pathPlan'].laneChangeState in [LaneChangeState.laneChangeStarting,
                                                  LaneChangeState.laneChangeFinishing]:
       self.events.add(EventName.laneChange)
-      if self.sm['pathPlan'].laneChangeState in [LaneChangeState.laneChangeStarting:
-
 
     if self.can_rcv_error or (not CS.canValid and self.sm.frame > 5 / DT_CTRL):
       self.events.add(EventName.canError)
