@@ -99,10 +99,11 @@ class CarController():
     self.last_pump_ts = 0.
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
+    self.radarVin_idx = 0
     
     # begin tesla radar
     p = Params()
-    self.radarVin_idx = 0
+  
     # set the radar vin if you want to use the tesla radar
     self.useTeslaRadar = 1 if p.get("TeslaRadarVin") != "00000000000000000" else 0
     if self.useTeslaRadar:
