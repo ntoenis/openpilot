@@ -167,7 +167,7 @@ class CarController():
       # TODO: radar disable hacked together to see if it works
       if (frame % 10) == 0:
         # tester present - w/ no response (keeps radar disabled)
-        can_sends.append([0x18DAB0F1, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0]) #force bus 0 because i took out CS.CP.isPandaBlack down below
+        can_sends.append([0x18DAB0F1, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 1]) #force 1 because i took out CS.CP.isPandaBlack down below
  
     # Send steering command.
     idx = frame % 4
