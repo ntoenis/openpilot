@@ -98,6 +98,7 @@ class CarController():
     self.last_pump_ts = 0.
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
+    self.radarVin_idx = 0
 
     self.params = CarControllerParams(CP)
 
@@ -206,5 +207,12 @@ class CarController():
             # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
             # This prevents unexpected pedal range rescaling
             can_sends.append(create_gas_command(self.packer, apply_gas, idx))
+            
+    if self.useTeslaRadar:
+      if (frame % 100 == 0):
+        can_sends.append(teslaradarcan.create_radar_VIN_msg(self.radarVin_idx, self.radarVin, self.radarBus, self.radarTriggerMessage, self.useTeslaRadar, int(self.radarPosition), int(self.radarEpasType)))
+        print("sending tesla vin msg")
+        self.radarVin_idx += 1
+        self.radarVin_idx = self.radarVin_idx % 3
 
     return can_sends
