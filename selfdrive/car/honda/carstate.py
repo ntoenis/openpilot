@@ -174,6 +174,15 @@ class CarState(CarStateBase):
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
     self.cruise_mode = 0
+    
+    ### START OF MAIN CONFIG OPTIONS ###
+    ### Do NOT modify here, modify in /data/bb_openpilot.cfg and reboot
+    self.useTeslaRadar = CP.enableGasInterceptor
+    self.radarVIN = "5YJXCAE23GF007137"
+    self.radarOffset = -1
+    self.radarPosition = 1
+    self.radarEpasType = 2
+    ### END OF MAIN CONFIG OPTIONS ###
 
   def update(self, cp, cp_cam, cp_body):
     ret = car.CarState.new_message()
