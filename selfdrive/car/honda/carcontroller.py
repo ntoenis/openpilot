@@ -99,6 +99,7 @@ class CarController():
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
     self.radarVin_idx = 0
+    self.RadarTriggerMessage = 0x94
 
     self.params = CarControllerParams(CP)
 
