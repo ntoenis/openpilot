@@ -44,6 +44,7 @@ keys = {
   b"LastAthenaPingTime": [TxType.PERSISTENT],
   b"LastUpdateTime": [TxType.PERSISTENT],
   b"LastUpdateException": [TxType.PERSISTENT],
+  b"LongitudinalControl": [TxType.PERSISTENT],
   b"LiveParameters": [TxType.PERSISTENT],
   b"OpenpilotEnabledToggle": [TxType.PERSISTENT],
   b"LaneChangeEnabled": [TxType.PERSISTENT],
