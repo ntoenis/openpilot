@@ -172,12 +172,12 @@ class CarController():
     # Send steering command.
     idx = frame % 4
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
-      lkas_active, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl))
+      lkas_active, CS.CP.carFingerprint, idx, CS.CP.openpilotLongitudinalControl))
 
     # Send dashboard UI commands.
     if (frame % 10) == 0:
       idx = (frame//10) % 4
-      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
+      can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.openpilotLongitudinalControl, CS.stock_hud))
 
     if not CS.CP.openpilotLongitudinalControl:
       if (frame % 2) == 0:
