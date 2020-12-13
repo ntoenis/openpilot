@@ -136,9 +136,9 @@ class CarInterface(CarInterfaceBase):
     if candidate in HONDA_BOSCH:
       ret.safetyModel = car.CarParams.SafetyModel.hondaBoschHarness
       ret.enableCamera = True
-      ret.radarOffCan = True
+      ret.radarOffCan = any(x for x in BOSCH_RADAR_MSGS if x in fingerprint)
       ret.openpilotLongitudinalControl = True
-      ret.enableCruise = not ret.openpilotLongitudinalControl
+      ret.enableCruise = ret.radarOffCan
       ret.communityFeature = ret.openpilotLongitudinalControl
       if ret.openpilotLongitudinalControl:
         ret.safetyParam |= BOSCH_LONG_FLAG
