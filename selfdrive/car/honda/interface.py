@@ -136,7 +136,7 @@ class CarInterface(CarInterfaceBase):
     if candidate in HONDA_BOSCH:
       ret.safetyModel = car.CarParams.SafetyModel.hondaBoschHarness
       ret.enableCamera = True
-      ret.radarOffCan = any(x for x in BOSCH_RADAR_MSGS if x in fingerprint)
+      ret.radarOffCan = True
       ret.openpilotLongitudinalControl = True
       ret.enableCruise = ret.radarOffCan
       ret.communityFeature = ret.openpilotLongitudinalControl
@@ -151,7 +151,6 @@ class CarInterface(CarInterfaceBase):
       ret.communityFeature = ret.enableGasInterceptor
 
     cloudlog.warning("ECU Camera Simulated: %r", ret.enableCamera)
-    cloudlog.warning("ECU Radar Simulated: %r", ret.radarOffCan and ret.openpilotLongitudinalControl)
     cloudlog.warning("ECU Gas Interceptor: %r", ret.enableGasInterceptor)
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
