@@ -138,7 +138,7 @@ class CarInterface(CarInterfaceBase):
       ret.enableCamera = True
       ret.radarOffCan = True
       ret.openpilotLongitudinalControl = True
-      ret.enableCruise = ret.radarOffCan
+      ret.enableCruise = ret.openpilotLongitudinalControl
       ret.communityFeature = ret.openpilotLongitudinalControl
       if ret.openpilotLongitudinalControl:
         ret.safetyParam |= BOSCH_LONG_FLAG
