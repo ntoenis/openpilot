@@ -183,7 +183,7 @@ class CarState(CarStateBase):
     self.radarPosition = 1
     self.radarEpasType = 2
     self.radarBus = 0
-    self.radarTriggerMessage = 0x94
+    self.radarTriggerMessage = 0x17c
     ### END OF MAIN CONFIG OPTIONS ###
 
   def update(self, cp, cp_cam, cp_body):
