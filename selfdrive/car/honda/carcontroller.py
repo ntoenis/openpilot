@@ -166,6 +166,12 @@ class CarController():
     can_sends = []
 
     
+    #if using radar, we need to send the VIN
+    if CS.useTeslaRadar and (frame % 100 == 0):
+      can_sends.append(hondacan.create_radar_VIN_msg(self.radarVin_idx,CS.radarVIN,0,0x94,CS.useTeslaRadar,CS.radarPosition,CS.radarEpasType))
+      self.radarVin_idx += 1
+      self.radarVin_idx = self.radarVin_idx  % 3
+      
     # Send steering command.
     idx = frame % 4
     can_sends.append(hondacan.create_steering_control(self.packer, apply_steer,
@@ -204,11 +210,5 @@ class CarController():
             # This prevents unexpected pedal range rescaling
             can_sends.append(create_gas_command(self.packer, apply_gas, idx))
             
-    if self.useTeslaRadar:
-      if (frame % 100 == 0):
-        can_sends.append(teslaradarcan.create_radar_VIN_msg(self.radarVin_idx, self.radarVin, self.radarBus, self.radarTriggerMessage, self.useTeslaRadar, int(self.radarPosition), int(self.radarEpasType)))
-        print("sending tesla vin msg")
-        self.radarVin_idx += 1
-        self.radarVin_idx = self.radarVin_idx % 3
 
     return can_sends
