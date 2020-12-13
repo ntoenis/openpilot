@@ -99,7 +99,7 @@ class CarController():
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
     self.radarVin_idx = 0
-    self.radarTriggerMessage = 0x94
+    self.radarTriggerMessage = 0x17c #also have tried 0x94
     self.useTeslaRadar = 0
 
     self.params = CarControllerParams(CP)
