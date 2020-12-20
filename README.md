@@ -4,3 +4,4 @@ Toggle on VisionRadarToggle
   
 If you get 'Cruise Fault' reboot the car slowly.
 
+BIG THANKS TO CSOUERS FOR WORKING HIS MAGIC AND GETTING THIS TO WORK!!!
