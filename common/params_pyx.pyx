@@ -71,7 +71,6 @@ keys = {
   b"Offroad_UpdateFailed": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_HardwareUnsupported": [TxType.CLEAR_ON_MANAGER_START],
   b"VisionRadarToggle": [TxType.PERSISTENT],
-  b"TeslaRadarActivate": [TxType.PERSISTENT],
   b"TeslaRadarVin": [TxType.PERSISTENT],
   b"TeslaRadarOffset": [TxType.PERSISTENT],
   b"TeslaRadarPosition": [TxType.PERSISTENT],

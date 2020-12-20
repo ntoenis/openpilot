@@ -79,7 +79,9 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
     params = Params()
-    use_tesla = params.get("TeslaRadarActivate")
+    # TODO: get this from a param elsewhere
+    use_tesla = True
+    # radar
     self.pts = {}
     # self.extPts = {}
     self.delay = 0
@@ -202,8 +204,6 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[message].aRel = cpt['LongAccel']
           self.pts[message].yvRel = cpt2['LatSpeed']
           self.pts[message].measured = bool(cpt['Meas'])
-
-          print(cpt['LongDist'], cpt['LatDist'] - self.radarOffset, cpt['LongAccel'])
           # self.extPts[message].dz = cpt2['dZ']
           # self.extPts[message].movingState = cpt2['MovingState']
           # self.extPts[message].length = cpt2['Length']
