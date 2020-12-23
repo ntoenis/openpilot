@@ -125,33 +125,40 @@ QWidget * device_panel() {
   Params params = Params();
   std::vector<std::pair<std::string, std::string>> labels = {
     {"Dongle ID", params.get("DongleId", false)},
-    //{"Serial Number", "abcdefghijk"},
   };
 
-  for (auto l : labels) {
+  // get serial number
+  //std::string cmdline = util::read_file("/proc/cmdline");
+  //auto delim = cmdline.find("serialno=");
+  //if (delim != std::string::npos) {
+  //  labels.push_back({"Serial", cmdline.substr(delim, cmdline.find(" ", delim))});
+  //}
+
+  for (auto &l : labels) {
     QString text = QString::fromStdString(l.first + ": " + l.second);
     device_layout->addWidget(new QLabel(text));
   }
 
+  // TODO: show current calibration values
   QPushButton *clear_cal_btn = new QPushButton("Reset Calibration");
   device_layout->addWidget(clear_cal_btn);
   QObject::connect(clear_cal_btn, &QPushButton::released, [=]() {
     Params().delete_db_value("CalibrationParams");
   });
 
-  std::map<std::string, const char *> power_btns = {
-    {"Power Off", "sudo poweroff"},
-    {"Reboot", "sudo reboot"},
-  };
-
-  for (auto b : power_btns) {
-    QPushButton *btn = new QPushButton(QString::fromStdString(b.first));
-    device_layout->addWidget(btn);
+  QPushButton *poweroff_btn = new QPushButton("Power Off");
+  device_layout->addWidget(poweroff_btn);
+  QPushButton *reboot_btn = new QPushButton("Reboot");
+  device_layout->addWidget(reboot_btn);
 #ifdef __aarch64__
-    QObject::connect(btn, &QPushButton::released,
-                     [=]() {std::system(b.second);});
+  QObject::connect(poweroff_btn, &QPushButton::released, [=]() { std::system("sudo poweroff"); });
+  QObject::connect(reboot_btn, &QPushButton::released, [=]() { std::system("sudo reboot"); });
 #endif
-  }
+
+  // TODO: add confirmation dialog
+  QPushButton *uninstall_btn = new QPushButton("Uninstall openpilot");
+  device_layout->addWidget(uninstall_btn);
+  QObject::connect(uninstall_btn, &QPushButton::released, [=]() { Params().write_db_value("DoUninstall", "1"); });
 
   QWidget *widget = new QWidget;
   widget->setLayout(device_layout);
@@ -206,12 +213,12 @@ QWidget * network_panel(QWidget * parent) {
 
 
 void SettingsWindow::setActivePanel() {
-  QPushButton *btn = qobject_cast<QPushButton*>(sender());
+  auto *btn = qobject_cast<QPushButton *>(nav_btns->checkedButton());
   panel_layout->setCurrentWidget(panels[btn->text()]);
 }
 
 SettingsWindow::SettingsWindow(QWidget *parent) : QWidget(parent) {
-  // sidebar
+  // two main layouts
   QVBoxLayout *sidebar_layout = new QVBoxLayout();
   panel_layout = new QStackedLayout();
 
@@ -221,7 +228,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QWidget(parent) {
     QPushButton {
       padding: 50px;
       font-weight: bold;
-      font-size: 100px;
+      font-size: 110px;
     }
   )");
   sidebar_layout->addWidget(close_button);
@@ -235,26 +242,33 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QWidget(parent) {
     {"toggles", toggles_panel()},
   };
 
+  nav_btns = new QButtonGroup();
   for (auto &panel : panels) {
     QPushButton *btn = new QPushButton(panel.first);
+    btn->setCheckable(true);
     btn->setStyleSheet(R"(
       QPushButton {
         padding-top: 35px;
         padding-bottom: 35px;
-        font-size: 60px;
-        text-align: right;
         border: none;
         background: none;
+        font-size: 55px;
+      }
+      QPushButton:checked {
+        font-size: 50px;
         font-weight: bold;
       }
     )");
 
-    sidebar_layout->addWidget(btn);
+    nav_btns->addButton(btn);
+    sidebar_layout->addWidget(btn, 0, Qt::AlignRight);
     panel_layout->addWidget(panel.second);
     QObject::connect(btn, SIGNAL(released()), this, SLOT(setActivePanel()));
   }
+  qobject_cast<QPushButton *>(nav_btns->buttons()[0])->setChecked(true);
 
   QHBoxLayout *settings_layout = new QHBoxLayout();
+  settings_layout->setMargin(0);
   settings_layout->addSpacing(45);
 
   sidebar_widget = new QWidget;
