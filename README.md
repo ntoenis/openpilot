@@ -19,7 +19,7 @@ Table of Contents
 * [Directory Structure](#directory-structure)
 * [Licensing](#licensing)
 
----
+--- 
 
 What is openpilot?
 ------
