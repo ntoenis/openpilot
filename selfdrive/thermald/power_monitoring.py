@@ -16,8 +16,8 @@ CAR_VOLTAGE_LOW_PASS_K = 0.091 # LPF gain for 5s tau (dt/tau / (dt/tau + 1))
 CAR_BATTERY_CAPACITY_uWh = 30e6
 CAR_CHARGING_RATE_W = 45
 
-VBATT_PAUSE_CHARGING = 11.0
-MAX_TIME_OFFROAD_S = 30*3600
+VBATT_PAUSE_CHARGING = 11.6
+MAX_TIME_OFFROAD_S = 6*3600
 
 class PowerMonitoring:
   def __init__(self):
