@@ -41,7 +41,7 @@ What is openpilot?
   </tr>
 </table>
 
-Integration with Stock Features
+Integration with Stock Features 
 ------
 
 In all supported cars:
