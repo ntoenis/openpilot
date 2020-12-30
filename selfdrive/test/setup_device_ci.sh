@@ -19,6 +19,9 @@ fi
 # this can get really big on the CI devices
 rm -rf /data/core
 
+# this can get really big on the CI devices
+rm -rf /data/core
+
 # set up environment
 cd $SOURCE_DIR
 git reset --hard
