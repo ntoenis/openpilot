@@ -1,4 +1,4 @@
-This fork is hard-coded to my Tesla Radar, sub the params in manager.py with your radar.
+This fork is hard-coded to my Tesla Radar, sub the params in manager.py, and line 108 in carcontroller.py,  with your radar.
 Toggle on VisionRadarToggle
   ```echo -n 1 >  /data/params/d/VisionRadarToggle```
   
