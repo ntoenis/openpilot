@@ -22,6 +22,11 @@ ALT_BRAKE_FLAG = 1
 BOSCH_LONG_FLAG = 2
 
 def compute_gb_honda_bosch(accel, speed):
+  creep_brake = 0.0
+  creep_speed = 2.3
+  creep_brake_value = 0.1 #maybe play with this for slow moving bumper to bumper traffic
+  if speed < creep_speed:
+    creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
   return float(accel) / 4.8
 
 def compute_gb_honda_nidec(accel, speed):
