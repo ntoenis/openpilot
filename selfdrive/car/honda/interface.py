@@ -211,11 +211,17 @@ class CarInterface(CarInterfaceBase):
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
       tire_stiffness_factor = 1.
-      
-      ret.longitudinalTuning.kpBP = [0., 5., 35.]
-      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
-      ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]
+    
+      ret.longitudinalTuning.kpBP = [0., 2.7, 5.5, 11.1, 27.7, 36.1] # 6, 12, 25, 60, 80 mph
+      ret.longitudinalTuning.kpV = [1.2, 1.05, 0.85, 0.75, 0.55, 0.45]
+      ret.longitudinalTuning.kiBP = [0., 36.1]
+      ret.longitudinalTuning.kiV  = [0.18, 0.12]
+      ret.longitudinalTuning.deadzoneBP = [0.]
+      ret.longitudinalTuning.deadzoneV = [0.]
+      #ret.longitudinalTuning.kpBP = [0., 5., 35.]
+      #ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
+      #ret.longitudinalTuning.kiBP = [0., 35.]
+      #ret.longitudinalTuning.kiV = [0.18, 0.12]
 
     elif candidate in (CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH):
       stop_and_go = True
@@ -447,8 +453,8 @@ class CarInterface(CarInterfaceBase):
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
     if candidate in HONDA_BOSCH:
-      ret.gasMaxBP = [0.0, 5., 10., 22., 35.] # m/s #0, 11, 22, 49, 78 mph
-      ret.gasMaxV = [0.33, 0.23, 0.20, 0.17, 0.15] #lessen gasMax as speed increases
+      ret.gasMaxBP = [0., 2.7, 5.5, 11.1, 36.1] #6, 12, 25, 60, 80 mph stolen from Hyuandai
+      ret.gasMaxV = [0.5, 0.33, 0.28, 0.2, 0.15]
       ret.brakeMaxBP = [0.]  # m/s
       ret.brakeMaxV = [1.]   # max brake allowed
     else:
@@ -458,7 +464,9 @@ class CarInterface(CarInterfaceBase):
       ret.brakeMaxV = [1., 0.8]   # max brake allowed
 
     ret.stoppingControl = True
-    ret.startAccel = 0.5 # launching from standstill
+    ret.stoppingBrakeRate = 0.1  # brake_travel/s while trying to stop
+    ret.startingBrakeRate = 2.0  # brake_travel/s while releasing on restart
+    ret.startAccel = 1.0
 
     ret.steerActuatorDelay = 0.1
     ret.steerRateCost = 0.5
