@@ -27,7 +27,7 @@ def compute_gb_honda_bosch(accel, speed):
   creep_brake_value = 0.1 #maybe play with this for slow moving bumper to bumper traffic
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  return float(accel) / 4.8
+  return float(accel) / 4.8 - creep_brake
 
 def compute_gb_honda_nidec(accel, speed):
   creep_brake = 0.0
