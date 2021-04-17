@@ -94,7 +94,7 @@ class LongitudinalMpc():
 
     # Calculate mpc
     t = sec_since_boot()
-    TR = 1.6 #1.2, 1.5, 1.8, 2.1-2.4 Bosch Honda timing
+    TR = 1.8 #1.2, 1.5, 1.8, 2.1-2.4 Bosch Honda timing
     n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, TR)
     duration = int((sec_since_boot() - t) * 1e9)
 
